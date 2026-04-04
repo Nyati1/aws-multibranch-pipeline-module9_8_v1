@@ -2,8 +2,9 @@
 
 library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
     [$class: 'GitSCMSource',
-    remote: 'https://gitlab.com/twn-devops-bootcamp/latest/09-aws/jenkins-shared-library.git',
-    credentialsID: 'gitlab-credentials'
+    // NEW GitHub Library URL
+    remote: 'https://github.com/Nyati1/jenkins-shared-library.git', 
+    credentialsId: 'jenkins-access_v1' 
     ]
 )
 
