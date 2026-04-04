@@ -2,7 +2,6 @@
 
 library identifier: 'jenkins-shared-library@master', retriever: modernSCM(
     [$class: 'GitSCMSource',
-    // NEW GitHub Library URL
     remote: 'https://github.com/Nyati1/jenkins-shared-library.git', 
     credentialsId: 'jenkins-access_v1' 
     ]
@@ -16,8 +15,9 @@ pipeline {
     environment {
         IMAGE_NAME = 'njogud/demo-app:jma2.0'
     }
-    /*stages {
-        stage('increment version') {
+    
+    stages {
+        /*stage('increment version') {
             steps {
                 script {
                     echo 'incrementing app version...'
@@ -30,12 +30,14 @@ pipeline {
                 }
             }
         }*/
+        
         stage('build app') {
             steps {
                 echo 'building application jar...'
                 buildJar()
             }
         }
+        
         stage('build image') {
             steps {
                 script {
@@ -46,25 +48,28 @@ pipeline {
                 }
             }
         } 
+        
         stage("deploy") {
             steps {
                 script {
                     echo 'deploying docker image to EC2...'
-                   def dockerCmd = 'docker run -p 3080:3080 -d njogud/react-nodejs-example:v1.0'
+                    def dockerCmd = 'docker run -p 3080:3080 -d njogud/react-nodejs-example:v1.0'
                     sshagent(['ec2-server-key']) {
-                       //sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 ${dockerCmd}"  
+                        //sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 ${dockerCmd}"  
                         sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 'docker rm -f my-app || true && ${dockerCmd}'"
-                   /* def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
-                    def ec2Instance = "ec2-user@18.184.54.160"
+                        
+                        /* def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+                        def ec2Instance = "ec2-user@18.184.54.160"
 
-                    sshagent(['ec2-server-key']) {
-                        sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
-                        sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"*/
+                        sshagent(['ec2-server-key']) {
+                            sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
+                            sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+                            sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"*/
                     }
                 }
-            }               
+            }                
         }
+        
         /*stage('commit version update'){
             steps {
                 script {
@@ -75,7 +80,7 @@ pipeline {
                         sh 'git push origin HEAD:jenkins-jobs'
                     }
                 }
-            }*/
-        }
+            }
+        }*/
     }
 }
