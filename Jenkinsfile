@@ -13,7 +13,10 @@ pipeline {
     tools {
         maven 'Maven'
     }
-    stages {
+    environment {
+        IMAGE_NAME = 'njogud/demo-app:jma2.0'
+    }
+    /*stages {
         stage('increment version') {
             steps {
                 script {
@@ -26,7 +29,7 @@ pipeline {
                     env.IMAGE_NAME = "$version-$BUILD_NUMBER"
                 }
             }
-        }
+        }*/
         stage('build app') {
             steps {
                 echo 'building application jar...'
@@ -47,19 +50,22 @@ pipeline {
             steps {
                 script {
                     echo 'deploying docker image to EC2...'
-
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+                   def dockerCmd = 'docker run -p 3080:3080 -d njogud/react-nodejs-example:v1.0'
+                    sshagent(['ec2-server-key']) {
+                       //sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 ${dockerCmd}"  
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 'docker rm -f my-app || true && ${dockerCmd}'"
+                   /* def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
                     def ec2Instance = "ec2-user@18.184.54.160"
 
                     sshagent(['ec2-server-key']) {
                         sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
                         sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"*/
                     }
                 }
             }               
         }
-        stage('commit version update'){
+        /*stage('commit version update'){
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
@@ -69,7 +75,7 @@ pipeline {
                         sh 'git push origin HEAD:jenkins-jobs'
                     }
                 }
-            }
+            }*/
         }
     }
 }
