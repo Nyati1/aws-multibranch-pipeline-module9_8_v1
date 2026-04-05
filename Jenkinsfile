@@ -17,7 +17,7 @@ pipeline {
     }
     
     stages {
-        /*stage('increment version') {
+        stage('increment version') {
             steps {
                 script {
                     echo 'incrementing app version...'
@@ -29,7 +29,7 @@ pipeline {
                     env.IMAGE_NAME = "$version-$BUILD_NUMBER"
                 }
             }
-        }*/
+        }
         
         stage('build app') {
             steps {
@@ -81,10 +81,10 @@ pipeline {
             }                
         }
         
-        /*stage('commit version update'){
+        stage('commit version update'){
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         sh 'git remote set-url origin https://$USER:$PASS@gitlab.com/twn-devops-bootcamp/latest/09-AWS/java-maven-app.git'
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
@@ -92,6 +92,6 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
     }
 }
