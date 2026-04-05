@@ -26,7 +26,7 @@ pipeline {
                         versions:commit'
                     def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
                     def version = matcher[0][1]
-                    env.IMAGE_NAME = "$version-$BUILD_NUMBER"
+                    env.IMAGE_NAME = "${version}-${BUILD_NUMBER}"
                 }
             }
         }
@@ -59,7 +59,7 @@ pipeline {
                     
                     // using shell script to run docker commands
                     
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}" 
+                    def shellCmd = "bash ./server-cmds.sh ${env.IMAGE_NAME}" 
                     
                     sshagent(['ec2-server-key']) {
                         // sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 ${dockerCmd}" 
@@ -84,14 +84,24 @@ pipeline {
         stage('commit version update'){
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        // Use the URLEncoder to handle special characters in the password
+                        def encodedPass = java.net.URLEncoder.encode(env.PASS, "UTF-8")
+                        sh "git remote set-url origin https://${env.USER}:${encodedPass}@github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
+                        
+                        sh 'git add .'
+                        sh 'git commit -m "ci: version bump" || echo "No changes to commit"'
+                        sh 'git push origin HEAD:jenkins-jobs'
+                    }
+                    
+                    /* withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         //def encodedPass = java.net.URLEncoder.encode(PASS, "UTF-8")
                         //sh "git remote set-url origin https://${USER}:${encodedPass}@github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
                        sh "git remote set-url origin https://$USER:$PASS@github.com:Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
                         sh 'git push origin HEAD:jenkins-jobs'
-                    }
+                    }*/
                 }
             }
         }
