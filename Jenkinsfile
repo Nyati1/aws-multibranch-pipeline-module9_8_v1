@@ -58,7 +58,9 @@ pipeline {
                     // def dockerComposeCmd = "docker-compose -f docker-compose.yaml up --detach"
                     
                     // using shell script to run docker commands
-                    def shellCmd = "bash ./server-cmds.sh" 
+                    
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}" 
+                    
                     sshagent(['ec2-server-key']) {
                         // sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 ${dockerCmd}" 
                         // sh "ssh -o StrictHostKeyChecking=no ec2-user@40.176.133.134 'docker rm -f my-app || true && ${dockerCmd}'"
