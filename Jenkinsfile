@@ -84,13 +84,30 @@ pipeline {
         stage('commit version update'){
             steps {
                 script {
-                     withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+
+withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+    sh '''
+    git config user.name "$GIT_USERNAME"
+    git config user.email "jenkins@example.com"
+
+    git config credential.helper store
+    echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+
+    git push origin HEAD:jenkins-jobs
+    '''
+}
+
+
+
+
+                    
+                    /* withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         // sh "git remote set-url origin https://$USER:$PASS@github.com:Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
                          sh "git remote set-url origin https://$USER:$PASS@github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
                         sh 'git push origin HEAD:jenkins-jobs'
-                    }
+                    }*/
                 }
             }
         }
