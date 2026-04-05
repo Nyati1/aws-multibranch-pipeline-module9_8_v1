@@ -84,32 +84,31 @@ pipeline {
         stage('commit version update'){
             steps {
                 script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh '''
+                        git config user.name "$GIT_USERNAME"
+                        git config user.email "jenkins@example.com"
 
-                         withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-    sh '''
-    git config user.name "$GIT_USERNAME"
-    git config user.email "jenkins@example.com"
+                        # Ensure correct remote (no bad formatting leftover)
+                        git remote set-url origin https://github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git
 
-    //ensure correct remote (no bad formatting leftover)
-    git remote set-url origin https://github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git
+                        # Force git to use this credentials file explicitly
+                        echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > .git-credentials
+                        git config credential.helper "store --file=.git-credentials"
 
-    # force git to use this credentials file explicitly
-    git config credential.helper "store --file=.git-credentials"
-    echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > .git-credentials
+                        # Prevent any interactive prompt
+                        export GIT_TERMINAL_PROMPT=0
 
-    # prevent any interactive prompt
-    export GIT_TERMINAL_PROMPT=0
+                        git add .
+                        git commit -m "ci: version bump" || true
 
-    git add .
-    git commit -m "ci: version bump" || true
+                        git push origin HEAD:jenkins-jobs
+                        
+                        # Clean up credentials file
+                        rm .git-credentials
+                        '''
+                    }
 
-    git push origin HEAD:jenkins-jobs
-    '''
-                         }
-
-
-
-                    
                     /* withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
                         // sh "git remote set-url origin https://$USER:$PASS@github.com:Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
                          sh "git remote set-url origin https://$USER:$PASS@github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git"
