@@ -89,23 +89,17 @@ pipeline {
                         git config user.name "$GIT_USERNAME"
                         git config user.email "jenkins@example.com"
 
-                        # Ensure correct remote (no bad formatting leftover)
+                        # ensure correct remote
                         git remote set-url origin https://github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git
 
-                        # Force git to use this credentials file explicitly
-                        echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > .git-credentials
-                        git config credential.helper "store --file=.git-credentials"
-
-                        # Prevent any interactive prompt
+                        # prevent prompt
                         export GIT_TERMINAL_PROMPT=0
 
                         git add .
                         git commit -m "ci: version bump" || true
 
-                        git push origin HEAD:jenkins-jobs
-                        
-                        # Clean up credentials file
-                        rm .git-credentials
+                        # push with credentials inline (most reliable in CI)
+                        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git HEAD:jenkins-jobs
                         '''
                     }
 
