@@ -85,18 +85,27 @@ pipeline {
             steps {
                 script {
 
-withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                         withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
     sh '''
     git config user.name "$GIT_USERNAME"
     git config user.email "jenkins@example.com"
 
-    git config credential.helper store
-    echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+    //ensure correct remote (no bad formatting leftover)
+    git remote set-url origin https://github.com/Nyati1/aws-multibranch-pipeline-module9_8_v1.git
+
+    # force git to use this credentials file explicitly
+    git config credential.helper "store --file=.git-credentials"
+    echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > .git-credentials
+
+    # prevent any interactive prompt
+    export GIT_TERMINAL_PROMPT=0
+
+    git add .
+    git commit -m "ci: version bump" || true
 
     git push origin HEAD:jenkins-jobs
     '''
-}
-
+                         }
 
 
 
